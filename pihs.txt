@@ -1,0 +1,68 @@
+// Implementacao do menu de opcoes (Loop)
+Loop_Menu: 
+	//input do usuario
+	if 1 - Chama metodo de leitura/modificacao 
+
+	Se tiver memoria alocada para os vetoresA e B mostrar os outros itens
+	*Quando terminar estas operacoes, printar o resultado e os vetores utilizados
+	if 2 - Encontrar Uniao - Como concatenar vetores?
+	if 3 - Encontrar instersecao - Como percorrer os vetores e ver os valores iguais *Pegar elemento por elemento, fixa 1 elemento de um vetor pra ser procurado no outro*
+	if 4 - Encontrar a diferenca - 	(A-B) Valores de A que nao estao em B - Mesmo principio do de interseccao *Tentar implementar uma funcao geral pra ambos os metodos, com uma subrotina de encontrar os valores iguais*
+	if 5 - Encontrar complementar - Retorna os elementos que nao estao presentes nos 2 vetores 
+
+	if 6 - Exit
+
+leitura: 
+	input - desalocar(se existe) ou alocar
+		tamanho dos vetor
+		valores -> pegar um por um, a cada um verificar se ja existe no vetor. Se tiver pega dnv
+	Vetores tem que ser diferentes
+
+Exemplo de codigo de alocar/desaloc
+
+vetorA:  space 4
+
+Na execução, para alocar:
+
+pushl   nbytes
+
+call      malloc
+
+movl    %eax, vetorA
+
+Na execução, para desalocar:
+
+pushl   vetorA
+
+call      free
+
+PRINT:
+
+1) print /formato (tipo)var
+: imprime o conteúdo de var de acordo com o formato e tipo
+: var é um rótulo de dado (variável)
+: pode-se usar cast: (char)var, (float)var, (double)var
+: conforme a versão do gdb, pode-se omitir o cast e usar apenas "print /formato var"
+: letras de formatos
+/d = decimal
+/x = hexadecimal
+/z = hexadecimal com zeros antes
+/o = octal
+/t = binario
+/c = caractere
+Exemplos:
+print /d (int)x
+print /x (int)x
+print /z (int)x
+print /o (int)x
+print /t (int)x
+print /c (int)x
+
+
+SCANF:
+pushl $frase
+pushl $tipostr
+call scanf
+
+https://drive.google.com/file/d/11HmOe5u5Z6NuyMj58macYKR7ngZ6CIdp/view
+Exemplo que mostrar como usar scanf e print
