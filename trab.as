@@ -61,42 +61,40 @@ _menu:
     movl    opcao, %eax
 
     cmpl    $1, %eax
-    jne     _opcao2
+    je     _opcao1
+    cmpl    $2, %eax
+    je     _opcao2
+    cmpl    $3, %eax
+    je     _opcao3
+    cmpl    $4, %eax
+    je     _opcao4
+    cmpl    $5, %eax
+    je     _opcao5
+    cmpl    $6, %eax
+    je     _opcao6
+    
+_opcao1:
     call    _leitura
     call    _menu
 
 _opcao2:
-    cmpl     $2, %eax
-    jne     _opcao3
     call    _uniao
     call    _menu
 
 _opcao3:
-    cmpl     $3, %eax
-    jne     _opcao4
     call    _interseccao
-    pushl   $souBurro
-    call    printf
     call    _menu
 
 _opcao4:
-    cmpl     $4, %eax
-    jne     _opcao5
     call    _diferenca
     call    _menu
 
 _opcao5:
-    cmpl     $5, %eax
-    jne     _opcao6
     call    _complemento
     call    _menu
 
 _opcao6:
-    cmpl     $6, %eax
-    je     _saida
-    pushl   $msgErroOpcao
-    call    printf
-    call    _menu
+    call    _saida
 
 _uniao:
     movl    tamA, %eax
@@ -145,8 +143,9 @@ _interseccao:
     movl    vetorB, %esi
     movl    tamB, %ecx
     movl    tamA, %ebx
+    call    _loopIgual
+    ret
     
-
 _loopIgual:
     movl    (%edi), %eax
     movl    (%esi), %edx
@@ -157,7 +156,6 @@ _loopIgual:
     jmp     _verificaVetorA
 
 _mostraIgual:
-    
     pushl   %eax
     pushl   $tipoOut
     call    printf
@@ -170,12 +168,12 @@ _verificaVetorA:
 
     cmpl    %eax, %ebx
     jne     _incrementaA
+    call    _saidaInterseccao
 
+_saidaInterseccao:
     pushl   $pulaLinha
     call    printf
     addl    $4, %esp
-
-    ret
 
 _incrementaA:
     addl    $4, %edi
@@ -184,12 +182,97 @@ _incrementaA:
     movl    tamB, %ecx
     jmp     _loopIgual
 
-
 _diferenca:
+    movl    tamA, %ecx
+    movl    tamB, %ebx
+    movl    vetorA, %edi
+    movl    vetorB, %esi
+
+_loopDiferenca:
+    movl    (%edi), %eax
+    movl    (%esi), %ebx
+    cmpl    %eax, %ebx
+    jne     _mostraDiferente
+    jmp     _incrementaLoop
+
+_incrementaLoop:
+    decl    %ecx
+    movl    $0, %ebx
+    cmpl    %ecx, %ebx
+    jne     _loopDiferenca
+
+    pushl   %edi
+    pushl   %ecx
+    pushl   $pulaLinha
+    call    printf
+    addl    $4, %esp
+    popl    %ecx
+    popl    %edi 
     ret
+
+_mostraDiferente: 
+    pushl   %edi
+    pushl   %ecx
+    pushl   %eax
+    pushl   $tipoOut
+    call    printf
+    addl    $8, %esp
+    popl    %ecx
+    popl    %edi
+    
+    addl    $4, %edi
+    jmp      _incrementaLoop
+
 
 _complemento:
+    movl    tamA, %eax
+    movl    tamB, %ebx
+    cmpl    %ebx, %eax
+    jge     _maiorA
     ret
+
+_maiorA:
+    pushl   $souBurro
+    call    printf
+    addl    $4, %esp
+    movl    tamA, %ecx
+    movl    vetorA, %edi
+    movl    vetorB, %esi
+    call    _loopComplemento
+
+_loopComplemento:
+    movl    (%edi), %eax
+    movl    (%esi), %edx
+    cmpl    %eax, %edx
+    jne     _achouComplemento
+
+    addl    $4, %edi
+    addl    $4, %esi
+
+_verificaTermino:
+    decl    %ecx
+    movl    $0, %ebx
+    cmpl    %ecx, %ebx
+    je      _saidaComplemento
+    jmp     _loopComplemento
+
+_saidaComplemento:
+    ret
+
+_achouComplemento:
+    pushl   %edi    
+    pushl   %ecx
+    pushl   %eax
+    pushl   $tipoOut
+    call    printf
+    addl    $8, %esp
+
+    popl    %ecx
+    popl    %edi
+    addl    $4, %edi
+
+    jmp     _verificaTermino
+
 
 _leitura:
 
