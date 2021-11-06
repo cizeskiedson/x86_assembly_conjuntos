@@ -66,3 +66,11 @@ call scanf
 
 https://drive.google.com/file/d/11HmOe5u5Z6NuyMj58macYKR7ngZ6CIdp/view
 Exemplo que mostrar como usar scanf e print
+
+
+	coisas que faltam:
+		n deixar numero repetido no insert
+		arrumar seg fault interseccao
+		implementar Complemento
+		n deixar numeros iguais na Uniao
+		

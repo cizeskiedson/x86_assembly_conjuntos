@@ -20,7 +20,8 @@
     tipoIn:     .asciz  "%d"
     tipoOut:    .asciz  " %d"
     pulaLinha:  .asciz  "\n"
-    
+    msgContinuar:   .asciz  "\nDeseja continuar a utilizar o programa? 1 - Sim ou 2 - Nao\n\n"
+    msgLeituraInicial:  .asciz  "\nVetores ainda nao iniciados! Para comecar a usar o programa, defina os vetores.\n"
     num:    .int    0
     opcao:  .int    0
     vetorA: .space  4
@@ -30,13 +31,22 @@
     tamB:   .int    0
     tamC:   .int    0
     aux:    .int    0
+    varContinuar:   .int    1
+    flagVetores:    .int    0
 .section .text
 
 .globl  _start
 
 _start:
     call    _abertura
+
+_chamaMenu:
+    movl    $1, %ebx
+    cmpl    varContinuar, %ebx
+    jne     _saida
     call    _menu
+    call    _continuar
+    jmp     _chamaMenu
 
 _abertura:
     pushl   $msgInicio
@@ -46,6 +56,13 @@ _abertura:
     ret  
 
 _menu:
+    pushl   %ebp
+    movl    %esp, %ebp  
+
+    movl    $0, %ebx
+    cmpl    tamA, %ebx
+    je     _inicioLeitura
+
     pushl   $msgMenu
     call    printf
 
@@ -60,41 +77,93 @@ _menu:
 
     movl    opcao, %eax
 
-    cmpl    $1, %eax
-    je     _opcao1
-    cmpl    $2, %eax
-    je     _opcao2
-    cmpl    $3, %eax
-    je     _opcao3
-    cmpl    $4, %eax
-    je     _opcao4
-    cmpl    $5, %eax
-    je     _opcao5
-    cmpl    $6, %eax
-    je     _opcao6
-    
 _opcao1:
-    call    _leitura
-    call    _menu
+    movl    $1, %ebx
+    cmpl    %eax, %ebx
+    jne     _opcao2
+    call    _alterar
+    call    _menuFim
 
 _opcao2:
+    movl    $2, %ebx
+    cmpl    %eax, %ebx
+    jne     _opcao3
     call    _uniao
-    call    _menu
+    call    _menuFim
 
 _opcao3:
+    movl    $3, %ebx
+    cmpl    %eax, %ebx
+    jne     _opcao4
     call    _interseccao
-    call    _menu
+    call    _menuFim
 
 _opcao4:
+    movl    $4, %ebx
+    cmpl    %eax, %ebx
+    jne     _opcao5
     call    _diferenca
-    call    _menu
+    call    _menuFim
 
 _opcao5:
+    movl    $5, %ebx
+    cmpl    %eax, %ebx
+    jne     _opcao5
     call    _complemento
-    call    _menu
+    call    _menuFim
 
 _opcao6:
+    movl    $6, %ebx
+    cmpl    %eax, %ebx
+    jne     _opcaoErrada
     call    _saida
+
+_opcaoErrada:
+    pushl   $msgErroOpcao
+    call    printf
+    addl    $4, %esp
+
+_menuFim:
+    movl    %ebp, %esp
+    popl    %ebp
+    ret
+
+_inicioLeitura:
+    call    _leitura
+    pushl   $msgMenu
+    call    printf
+
+    pushl   $msgOpcao
+    call    printf
+
+    pushl   $opcao
+    pushl   $tipoIn
+    call    scanf
+
+    addl    $12, %esp
+
+    movl    opcao, %eax
+    jmp     _opcao1
+
+_continuar:
+    pushl   %ebp
+    movl    %esp, %ebp
+    
+    pushl   $msgContinuar
+    call    printf
+
+    pushl   $varContinuar
+    pushl   $tipoIn
+    call    scanf   
+
+    movl    $2, %ebx
+    cmpl    varContinuar, %ebx
+    je      _saida  
+    
+    addl    $8, %esp 
+    movl    %ebp, %esp
+    popl    %ebp
+    ret
 
 _uniao:
     movl    tamA, %eax
@@ -193,9 +262,8 @@ _loopDiferenca:
     movl    (%esi), %ebx
     cmpl    %eax, %ebx
     jne     _mostraDiferente
-    jmp     _incrementaLoop
 
-_incrementaLoop:
+_incrementaLoopDiferenca:
     decl    %ecx
     movl    $0, %ebx
     cmpl    %ecx, %ebx
@@ -221,60 +289,38 @@ _mostraDiferente:
     popl    %edi
     
     addl    $4, %edi
-    jmp      _incrementaLoop
+    jmp      _incrementaLoopDiferenca
 
 
 _complemento:
-    movl    tamA, %eax
-    movl    tamB, %ebx
-    cmpl    %ebx, %eax
-    jge     _maiorA
-    ret
-
-_maiorA:
-    pushl   $souBurro
-    call    printf
-    addl    $4, %esp
-    movl    tamA, %ecx
+    movl    tamB, %ecx
     movl    vetorA, %edi
     movl    vetorB, %esi
-    call    _loopComplemento
-
-_loopComplemento:
-    movl    (%edi), %eax
-    movl    (%esi), %edx
-    cmpl    %eax, %edx
-    jne     _achouComplemento
-
-    addl    $4, %edi
-    addl    $4, %esi
-
-_verificaTermino:
-    decl    %ecx
-    movl    $0, %ebx
-    cmpl    %ecx, %ebx
-    je      _saidaComplemento
-    jmp     _loopComplemento
-
-_saidaComplemento:
-    ret
-
-_achouComplemento:
-    pushl   %edi    
-    pushl   %ecx
-    pushl   %eax
-    pushl   $tipoOut
-    call    printf
-    addl    $8, %esp
-
-    popl    %ecx
-    popl    %edi
-    addl    $4, %edi
-
-    jmp     _verificaTermino
+    
 
 
 _leitura:
+    pushl   $msgLeituraInicial
+    call    printf
+    addl    $4, %esp
+
+    call    _leTamA
+    call    _leTamB
+
+    call    _alocarVetorA
+    call    _alocarVetorB
+
+    call    _leVetorA
+    call    _leVetorB
+
+    movl      tamA, %eax
+    cmpl      %eax, tamB
+    jne      _mostraVetores
+
+    call    _comparaVetorInicial
+
+
+_alterar:
 
     cmpl    $0, tamA
     jne     _desalocaVetor
@@ -460,7 +506,10 @@ _desalocaVetor:
 
     addl    $8, %esp
 
-    ret
+    movl    $0, tamA
+    movl    $0, tamB
+
+    jmp     _alterar
 
 _comparaVetor:
     movl    tamA, %ecx
@@ -481,9 +530,37 @@ _saoIguais:
     pushl   $msgIguais
     call    printf
     addl    $4, %esp
-    call    _leitura
+    call    _alterar
 
 _saoDiferentes:
+    pushl   $msgDiferentes
+    call    printf
+    addl    $4, %esp
+    ret
+
+
+_comparaVetorInicial:
+    movl    tamA, %ecx
+    movl    vetorA, %edi
+    movl    vetorB, %esi
+
+_flagComparaInicial:
+
+    movl    (%edi), %eax
+    movl    (%esi), %ebx
+    cmpl    %ebx, %eax
+    jne     _saoDiferentesInicial
+    addl    $4, %edi
+    addl    $4, %esi
+    loop    _flagComparaInicial
+
+_saoIguaisInicial:
+    pushl   $msgIguais
+    call    printf
+    addl    $4, %esp
+    call    _leitura
+
+_saoDiferentesInicial:
     pushl   $msgDiferentes
     call    printf
     addl    $4, %esp
