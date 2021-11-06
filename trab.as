@@ -205,14 +205,18 @@ _loopCopiaB:
     ret
 
 _interseccao:
-
+    pushl   %ebp
+    movl    %esp, %ebp  
     pushl   $mostraInter
     call    printf
+    addl    $4, %esp
     movl    vetorA, %edi
     movl    vetorB, %esi
     movl    tamB, %ecx
     movl    tamA, %ebx
     call    _loopIgual
+    movl    %ebp, %esp
+    popl    %ebp
     ret
     
 _loopIgual:
@@ -225,24 +229,29 @@ _loopIgual:
     jmp     _verificaVetorA
 
 _mostraIgual:
+    pushl   %edi
+    pushl   %ecx
     pushl   %eax
     pushl   $tipoOut
     call    printf
-    addl    $4, %esp
+    addl    $8, %esp
+    popl    %ecx
+    popl    %edi
 
     jmp    _verificaVetorA
 
 _verificaVetorA:
     movl    $0, %eax
-
     cmpl    %eax, %ebx
     jne     _incrementaA
-    call    _saidaInterseccao
+    jmp    _saidaInterseccao
+    
 
 _saidaInterseccao:
     pushl   $pulaLinha
     call    printf
     addl    $4, %esp
+    ret
 
 _incrementaA:
     addl    $4, %edi
@@ -291,13 +300,10 @@ _mostraDiferente:
     addl    $4, %edi
     jmp      _incrementaLoopDiferenca
 
-
 _complemento:
     movl    tamB, %ecx
     movl    vetorA, %edi
     movl    vetorB, %esi
-    
-
 
 _leitura:
     pushl   $msgLeituraInicial
@@ -318,7 +324,6 @@ _leitura:
     jne      _mostraVetores
 
     call    _comparaVetorInicial
-
 
 _alterar:
 
@@ -538,7 +543,6 @@ _saoDiferentes:
     addl    $4, %esp
     ret
 
-
 _comparaVetorInicial:
     movl    tamA, %ecx
     movl    vetorA, %edi
@@ -571,4 +575,3 @@ _saida:
     call    printf
     pushl   $0
     call    exit 
-

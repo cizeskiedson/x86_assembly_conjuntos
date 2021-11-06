@@ -70,7 +70,5 @@ Exemplo que mostrar como usar scanf e print
 
 	coisas que faltam:
 		n deixar numero repetido no insert
-		arrumar seg fault interseccao
 		implementar Complemento
 		n deixar numeros iguais na Uniao
-		
