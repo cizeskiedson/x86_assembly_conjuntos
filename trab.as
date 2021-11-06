@@ -31,6 +31,7 @@
     tamB:   .int    0
     tamC:   .int    0
     aux:    .int    0
+    auxComplemento: .int    0
     varContinuar:   .int    1
     flagVetores:    .int    0
 .section .text
@@ -108,7 +109,7 @@ _opcao4:
 _opcao5:
     movl    $5, %ebx
     cmpl    %eax, %ebx
-    jne     _opcao5
+    jne     _opcao6
     call    _complemento
     call    _menuFim
 
@@ -122,6 +123,9 @@ _opcaoErrada:
     pushl   $msgErroOpcao
     call    printf
     addl    $4, %esp
+    movl    %ebp, %esp
+    popl    %ebp
+    jmp     _chamaMenu
 
 _menuFim:
     movl    %ebp, %esp
@@ -218,7 +222,7 @@ _interseccao:
     movl    %ebp, %esp
     popl    %ebp
     ret
-    
+
 _loopIgual:
     movl    (%edi), %eax
     movl    (%esi), %edx
@@ -246,7 +250,6 @@ _verificaVetorA:
     jne     _incrementaA
     jmp    _saidaInterseccao
     
-
 _saidaInterseccao:
     pushl   $pulaLinha
     call    printf
@@ -301,9 +304,51 @@ _mostraDiferente:
     jmp      _incrementaLoopDiferenca
 
 _complemento:
-    movl    tamB, %ecx
+    movl    tamA, %ecx
     movl    vetorA, %edi
     movl    vetorB, %esi
+
+    movl    (%edi), %eax
+    movl    tamB, %ebx
+    movl    %ebx, auxComplemento
+
+_loopComplemento:
+    movl    (%esi), %ebx
+    cmpl    %eax, %ebx
+    jne     _mostraComplemento
+    addl    $4, %edi
+    addl    $4, %esi
+
+
+    jmp     _incrementaLoopComplemento
+
+_mostraComplemento:
+    pushl   %edi
+    pushl   %ecx
+    pushl   %eax
+    pushl   $tipoOut
+    call    printf
+    addl    $8, %esp
+    popl    %ecx
+    popl    %edi
+    
+    addl    $4, %edi
+    jmp      _incrementaLoopDiferenca
+
+_incrementaLoopComplemento:
+    decl    %ecx
+    movl    $0, %ebx
+    cmpl    %ecx, %ebx
+    jne     _loopDiferenca
+
+    pushl   %edi
+    pushl   %ecx
+    pushl   $pulaLinha
+    call    printf
+    addl    $4, %esp
+    popl    %ecx
+    popl    %edi 
+    ret
 
 _leitura:
     pushl   $msgLeituraInicial
