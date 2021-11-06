@@ -12,6 +12,8 @@
     mostraVetorB: .asciz "Vetor B lido:\n"
     mostraVetorC: .asciz "Conjunto Uniao:\n"
     mostraInter:    .asciz "Conjunto Interseccao:\n"
+    mostraComplemento:  .asciz  "Conjunto Complementar:\n"
+    mostraDiferenca:    .asciz  "Conjunto Diferenca:\n"
     msgSaida:   .asciz  "Encerrando programa...\n"
     msgIguais:  .asciz  "Vetores iguais! Por favor, insira novamente com valores distintos.\n"
     msgDiferentes:  .asciz "Vetores diferentes. Continuando a execucao...\n"
@@ -22,6 +24,7 @@
     pulaLinha:  .asciz  "\n"
     msgContinuar:   .asciz  "\nDeseja continuar a utilizar o programa? 1 - Sim ou 2 - Nao\n\n"
     msgLeituraInicial:  .asciz  "\nVetores ainda nao iniciados! Para comecar a usar o programa, defina os vetores.\n"
+    msgElemIguais:  .asciz  "\nElementos iguais no vetor.\n Por favor, execute novamente o programa sem passar elementos repetidos!\n"
     num:    .int    0
     opcao:  .int    0
     vetorA: .space  4
@@ -31,6 +34,9 @@
     tamB:   .int    0
     tamC:   .int    0
     aux:    .int    0
+    elemA:  .int    0
+    elemB:  .int    0
+    contador:   .int    0
     auxComplemento: .int    0
     varContinuar:   .int    1
     flagVetores:    .int    0
@@ -211,6 +217,7 @@ _loopCopiaB:
 _interseccao:
     pushl   %ebp
     movl    %esp, %ebp  
+    call    _mostraVetores
     pushl   $mostraInter
     call    printf
     addl    $4, %esp
@@ -264,6 +271,10 @@ _incrementaA:
     jmp     _loopIgual
 
 _diferenca:
+    call    _mostraVetores
+    pushl   $mostraDiferenca
+    call    printf
+    addl    $4, %esp
     movl    tamA, %ecx
     movl    tamB, %ebx
     movl    vetorA, %edi
@@ -304,6 +315,11 @@ _mostraDiferente:
     jmp      _incrementaLoopDiferenca
 
 _complemento:
+    call    _mostraVetores
+    pushl   $mostraComplemento
+    call    printf
+    addl    $4, %esp
+
     movl    tamA, %ecx
     movl    vetorA, %edi
     movl    vetorB, %esi
@@ -318,7 +334,6 @@ _loopComplemento:
     jne     _mostraComplemento
     addl    $4, %edi
     addl    $4, %esi
-
 
     jmp     _incrementaLoopComplemento
 
@@ -364,11 +379,79 @@ _leitura:
     call    _leVetorA
     call    _leVetorB
 
+    call    _igualA 
+    call    _igualB
+
     movl      tamA, %eax
     cmpl      %eax, tamB
     jne      _mostraVetores
 
+
     call    _comparaVetorInicial
+
+_igualA:
+    pushl   %ebp
+    movl    %esp, %ebp  
+    movl    vetorA, %edi
+    movl    tamA, %ecx
+    movl    tamA, %ebx
+_procuraA:
+    pushl   %edi
+    pushl   %ecx
+    pushl   %ebx
+    movl    $0, %edx
+    cmpl    %ebx, %edx
+    je      _saidaIgual
+    movl    elemA, %eax
+    movl    (%edi), %eax
+_loopA:
+    addl    $4, %edi
+    cmpl    %eax, (%edi)
+    je      _erroIgual
+    loop    _loopA
+    popl    %ebx
+    popl    %ecx
+    popl    %edi
+    addl    $4, %edi
+    decl    %ebx
+    jmp     _procuraA
+
+_saidaIgual:
+    movl    %ebp, %esp
+    popl    %ebp
+    ret
+_erroIgual:
+    pushl   $msgElemIguais
+    call    printf
+    addl    $4, %esp
+    call    _saida
+
+_igualB:
+    pushl   %ebp
+    movl    %esp, %ebp  
+    movl    vetorB, %edi
+    movl    tamB, %ecx
+    movl    tamB, %ebx
+_procuraB:
+    pushl   %edi
+    pushl   %ecx
+    pushl   %ebx
+    movl    $0, %edx
+    cmpl    %ebx, %edx
+    je      _saidaIgual
+    movl    elemB, %eax
+    movl    (%edi), %eax
+_loopB:
+    addl    $4, %edi
+    cmpl    %eax, (%edi)
+    je      _erroIgual
+    loop    _loopB
+    popl    %ebx
+    popl    %ecx
+    popl    %edi
+    addl    $4, %edi
+    decl    %ebx
+    jmp     _procuraB
 
 _alterar:
 
@@ -383,6 +466,9 @@ _alterar:
 
     call    _leVetorA
     call    _leVetorB
+
+    call    _igualA 
+    call    _igualB
 
     movl      tamA, %eax
     cmpl      %eax, tamB
@@ -466,13 +552,10 @@ _leVet:
     call    printf
     addl    $4, %esp
 
-
-
     pushl   $num
     pushl   $tipoIn
     call    scanf
     addl    $8, %esp
-
 
     popl    %ebx
     popl    %edi
@@ -483,8 +566,9 @@ _leVet:
     addl    $4, %edi
     incl    %ebx
 
+    incl    contador
     loop    _leVet 
-    ret
+    ret  
 
 _mostraVetorA:
     pushl   $mostraVetorA
